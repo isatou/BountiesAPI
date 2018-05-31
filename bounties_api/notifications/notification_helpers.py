@@ -19,8 +19,13 @@ def create_notification(bounty, notification_name, user, notification_created, s
         is_activity=is_activity,
         data={'link': bounty_url},
     )
-    username = bounty.user.name or 'bounty hunter'
+
+    if bounty.platform == 'gitcoin':
+        return
+    bounty_user = bounty.user
+    username = 'bounty hunter'
+    if bounty_user and bounty_user.name:
+        username = bounty_user.name
     email_html = render_to_string('base_notification.html', context={'link': bounty_url, 'username': username, 'message_string': string_data})
     email_txt = 'Hello {}! \n {} \n View in app: {}'.format(username, string_data, bounty_url)
-    if bounty.platform != 'gitcoin':
-        send_email(bounty.user.email, subject, email_txt, email_html)
+    send_email(bounty.user.email, subject, email_txt, email_html)
